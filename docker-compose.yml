@@ -1,12 +1,64 @@
+version: '3.8'
+
 services:
-  mongodb:
-    image: mongo:latest
-    container_name: tqc_python_db
+  # Frontend Application (Next.js)
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: praxis-frontend
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_BACKEND_URL=/api
+    depends_on:
+      - backend
+
+  # Backend Application (Nest.js)
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: praxis-backend
+    restart: always
+    environment:
+      - PORT=3001
+      - MONGODB_URI=mongodb://mongo:27017/praxis-db
+      - JWT_SECRET=${JWT_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      # Google OAuth
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - NODE_ENV=${NODE_ENV:-production}
+    depends_on:
+      - mongo
+    expose:
+      - "3001"
+
+  # Database (MongoDB)
+  mongo:
+    image: mongo:6
+    container_name: praxis-mongo
+    restart: always
+    volumes:
+      - mongo-data:/data/db
+    expose:
+      - "27017"
+
+  # Reverse Proxy (Nginx)
+  nginx:
+    image: nginx:alpine
+    container_name: praxis-nginx
     restart: always
     ports:
-      - "27017:27017"
+      - "80:80"
     volumes:
-      - mongodb_data:/data/db
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
 
 volumes:
-  mongodb_data:
+  mongo-data:
