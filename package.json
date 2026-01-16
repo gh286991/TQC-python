@@ -1,0 +1,17 @@
+{
+  "name": "TQC python",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "pnpm install && concurrently \"pnpm --filter backend start:dev\" \"pnpm --filter frontend dev\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.24.0",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

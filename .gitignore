@@ -1,0 +1,29 @@
+# Credentials
+.env
+.env.*
+!.env.example
+
+# Dependencies
+node_modules/
+.pnpm-store
+
+# Next.js
+.next/
+out/
+build/
+
+# NestJS
+dist/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# System
+.DS_Store
+.idea/
+.vscode/
+*.log
+
