@@ -39,7 +39,7 @@ services:
 
   # Database (MongoDB)
   mongo:
-    image: mongo:6
+    image: mongo:latest
     container_name: praxis-mongo
     restart: always
     volumes:
@@ -49,13 +49,13 @@ services:
 
   # Reverse Proxy (Nginx)
   nginx:
-    image: nginx:alpine
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
     container_name: praxis-nginx
     restart: always
     ports:
       - "80:80"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - frontend
       - backend
