@@ -4,8 +4,8 @@ services:
   # Frontend Application (Next.js)
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: praxis-frontend
     restart: always
     environment:
@@ -17,8 +17,8 @@ services:
   # Backend Application (Nest.js)
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: praxis-backend
     restart: always
     environment:
