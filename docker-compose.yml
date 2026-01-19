@@ -4,8 +4,10 @@ services:
   # Frontend Application (Next.js)
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_URL: ${NEXT_PUBLIC_BACKEND_URL:-/api}
     container_name: praxis-frontend
     restart: always
     environment:
@@ -16,6 +18,7 @@ services:
 
   # Backend Application (Nest.js)
   backend:
+
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -32,10 +35,35 @@ services:
       - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
       - FRONTEND_URL=${FRONTEND_URL}
       - NODE_ENV=${NODE_ENV:-production}
+      - PYTHON_RUNNER_CONTAINER_NAME=${PYTHON_RUNNER_CONTAINER_NAME:-praxis-python-runner}
     depends_on:
       - mongo
+      - python-runner # Ensure backend waits for/knows about runner, though backend spawns it dynamically
+      # Actually backend needs the IMAGE available. Docker compose build will build services.
+    # To allow backend to spawn sibling containers, we need to mount docker socket
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp:/tmp # Share tmp for code file exchange
     expose:
       - "3001"
+
+  # Python Runner Service (Build only helper)
+  # This service is mainly to ensure the image 'python-runner' (or similar) is built.
+  # However, our code uses 'python:3.11-alpine' directly.
+  # If we want a custom image, we define it here.
+  # For now, let's keep it simple and just ensure the backend has docker access.
+  python-runner:
+     build:
+       context: ./backend/docker/nsjail
+       dockerfile: Dockerfile
+     image: tqc-nsjail-runner:latest
+     container_name: praxis-python-runner
+     command: ["tail", "-f", "/dev/null"] # Keep it running if we want to exec into it, or just for build
+     init: true
+     volumes:
+       - ./backend/temp:/app/temp
+     network_mode: none
+     privileged: true
 
   # Database (MongoDB)
   mongo:

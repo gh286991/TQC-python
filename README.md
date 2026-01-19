@@ -93,6 +93,22 @@ pnpm dev
 - **Git 分支**: 主分支為 `master`。
 - **Python 執行**: 後端預設使用系統的 `python3` 指令執行使用者提交的程式碼，請確保伺服器環境已安裝 Python。
 
+## 🏗️ 架構設計決策 (Architectural Decisions)
+
+### Code Execution Engine (程式碼執行引擎)
+
+我們目前採用 **Piston Public API** (`emkc.org`) 作為 Python 程式碼的執行沙箱。
+
+- **決策背景**:
+  - 最初計畫自行架設 Docker 容器 (或 Docker-in-Docker) 來建立隔離沙箱。
+  - 但由於部署平台 **Zeabur** 預設不支援 `Privileged Mode` (特權模式)，且對檔案系統有嚴格的 Read-only 限制，導致無法順利運行 `nsjail` 或 `docker` 服務。
+- **解決方案**:
+
+  - 改用 Piston 的公開 API 服務。這是一個免配置、零維護成本的方案，且能確保程式碼在遠端安全隔離的環境中執行，完全隔離了對我們伺服器的潛在風險。
+
+- **未來規劃**:
+  - 若未來用戶量增長導致碰到 API Rate Limit (目前約 5 req/sec)，或者需要更客製化的執行環境，我們將會遷移至支援 Docker 的 VPS (如 DigitalOcean, Railway) 並自行架設 Piston 服務。
+
 ## 📄 License
 
 MIT
