@@ -1,0 +1,52 @@
+{
+  "title": "兩數相加",
+  "description": "請撰寫程式讀取兩個整數 a 和 b,輸出它們的和。\n\n## 輸入格式\n兩個整數 a 和 b,以空格分隔\n\n## 輸出格式\na + b 的結果",
+  "difficulty": "easy",
+  "samples": [
+    {
+      "input": "3 5",
+      "output": "8",
+      "explanation": "3 + 5 = 8"
+    },
+    {
+      "input": "10 20",
+      "output": "30",
+      "explanation": "10 + 20 = 30"
+    }
+  ],
+  "testCases": [
+    {
+      "input": "0 0",
+      "output": "0",
+      "type": "edge",
+      "description": "零值測試"
+    },
+    {
+      "input": "-5 5",
+      "output": "0",
+      "type": "basic",
+      "description": "負數與正數相加"
+    },
+    {
+      "input": "100 200",
+      "output": "300",
+      "type": "basic",
+      "description": "大數相加"
+    },
+    {
+      "input": "-10 -20",
+      "output": "-30",
+      "type": "basic",
+      "description": "兩個負數相加"
+    },
+    {
+      "input": "999 1",
+      "output": "1000",
+      "type": "boundary",
+      "description": "接近千位數"
+    }
+  ],
+  "referenceCode": "a, b = map(int, input().split())\nprint(a + b)",
+  "tags": ["數學運算", "基礎輸入輸出"],
+  "constraints": "整數範圍: -1000 到 1000"
+}

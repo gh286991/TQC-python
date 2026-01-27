@@ -1,0 +1,100 @@
+{
+  "title": "Log 檔案分析",
+  "description": "請撰寫程式讀取 server.log 檔案,統計檔案中包含 ERROR 和 INFO 的行數。\n\n## 輸入格式\n從 server.log 檔案讀取日誌內容\n\n## 輸出格式\n```\nERROR count: X\nINFO count: Y\n```\n\n## 範例\n如果 server.log 內容為:\n```\n[INFO] System started\n[ERROR] Connection failed\nRandom log line\n[INFO] Retry successful\n```\n\n則輸出:\n```\nERROR count: 1\nINFO count: 2\n```",
+  "difficulty": "medium",
+  "samples": [
+    {
+      "input": "",
+      "output": "ERROR count: 0\nINFO count: 0",
+      "explanation": "空檔案測試",
+      "fileAssets": {
+        "server.log": ""
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 1\nINFO count: 1",
+      "explanation": "基本混合日誌",
+      "fileAssets": {
+        "server.log": "[INFO] System started\n[ERROR] Connection failed"
+      }
+    }
+  ],
+  "testCases": [
+    {
+      "input": "",
+      "output": "ERROR count: 0\nINFO count: 0",
+      "type": "edge",
+      "description": "空檔案",
+      "fileAssets": {
+        "server.log": ""
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 1\nINFO count: 1",
+      "type": "basic",
+      "description": "基本混合日誌",
+      "fileAssets": {
+        "server.log": "[INFO] Started\n[ERROR] Failed"
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 3\nINFO count: 2",
+      "type": "basic",
+      "description": "多筆混合日誌",
+      "fileAssets": {
+        "server.log": "[INFO] Started\n[ERROR] Failed\nRandom log\n[ERROR] Retry\n[INFO] Success\n[ERROR] Warning"
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 0\nINFO count: 5",
+      "type": "basic",
+      "description": "僅 INFO 日誌",
+      "fileAssets": {
+        "server.log": "[INFO] I1\n[INFO] I2\n[INFO] I3\n[INFO] I4\n[INFO] I5"
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 5\nINFO count: 0",
+      "type": "basic",
+      "description": "僅 ERROR 日誌",
+      "fileAssets": {
+        "server.log": "[ERROR] E1\n[ERROR] E2\n[ERROR] E3\n[ERROR] E4\n[ERROR] E5"
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 5\nINFO count: 5",
+      "type": "boundary",
+      "description": "大量混合日誌",
+      "fileAssets": {
+        "server.log": "[ERROR] E1\n[INFO] I1\n[ERROR] E2\n[INFO] I2\n[ERROR] E3\n[INFO] I3\n[ERROR] E4\n[INFO] I4\n[ERROR] E5\n[INFO] I5"
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 2\nINFO count: 2",
+      "type": "basic",
+      "description": "包含干擾文字",
+      "fileAssets": {
+        "server.log": "Random text\n[ERROR] First error\nMore random\n[INFO] Some info\nEven more text\n[ERROR] Second error\nFinal random\n[INFO] Final info"
+      }
+    },
+    {
+      "input": "",
+      "output": "ERROR count: 10\nINFO count: 10",
+      "type": "boundary",
+      "description": "邊界測試 - 大量資料",
+      "fileAssets": {
+        "server.log": "[ERROR] E1\n[INFO] I1\n[ERROR] E2\n[INFO] I2\n[ERROR] E3\n[INFO] I3\n[ERROR] E4\n[INFO] I4\n[ERROR] E5\n[INFO] I5\n[ERROR] E6\n[INFO] I6\n[ERROR] E7\n[INFO] I7\n[ERROR] E8\n[INFO] I8\n[ERROR] E9\n[INFO] I9\n[ERROR] E10\n[INFO] I10"
+      }
+    }
+  ],
+  "referenceCode": "error_count = 0\ninfo_count = 0\nwith open('server.log', 'r') as f:\n    for line in f:\n        if 'ERROR' in line:\n            error_count += 1\n        if 'INFO' in line:\n            info_count += 1\nprint(f\"ERROR count: {error_count}\")\nprint(f\"INFO count: {info_count}\")",
+  "tags": ["檔案讀寫", "字串處理", "迴圈"],
+  "constraints": "檔案大小不超過 1MB"
+}
