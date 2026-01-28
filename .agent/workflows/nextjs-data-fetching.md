@@ -1,10 +1,10 @@
 ---
-description: Next.js SSR 認證與 API 調用最佳實踐
+description: Next.js 資料擷取 (Data Fetching) 與認證最佳實踐
 ---
 
-# Next.js SSR 認證最佳實踐
+# Next.js 資料擷取與認證指南
 
-本 skill 涵蓋 Next.js 應用中 SSR（Server-Side Rendering）與客戶端的認證和 API 調用最佳實踐。
+本文件涵蓋 Next.js 應用中 **Server-Side Rendering (SSR)** 與 **Client-Side Rendering (CSR)** 的資料擷取最佳實踐，特別著重於如何處理認證 (Authentication) 與跨域 (CORS) 問題。
 
 ## 核心原則
 
@@ -26,37 +26,64 @@ const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/users/profile`);
 
 Server Components 在服務器端執行，需要：
 
-1. 使用 `cookies()` 獲取 token
-2. 手動傳遞 Cookie header
-3. 使用內部後端 URL（避免繞遠路）
+3. 使用封裝好的 `serverApi` Helper (推薦)
+
+雖然手動處理可列，但推薦使用 `lib/api/server.ts` 中的 `serverApi` 封裝，以確保代碼整潔且一致處理 Base URL 與 Cookie。
+
+**第一步：定義 Server API Helper (`lib/api/server.ts`)**
 
 ```typescript
-// app/page.tsx (Server Component)
+// lib/api/server.ts
 import { cookies } from "next/headers";
 
-async function getData() {
+export async function fetchServer<T>(
+  path: string,
+  options: RequestInit = {},
+): Promise<T | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get("jwt_token")?.value;
 
-  if (!token) return { user: null };
-
-  const headers = {
-    "Content-Type": "application/json",
-    Cookie: `jwt_token=${token}`, // 手動傳遞 cookie
-  };
-
-  // SSR 優先使用內部 URL
   const baseUrl =
     process.env.BACKEND_INTERNAL_URL ||
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     "http://localhost:3001/api";
 
-  const res = await fetch(`${baseUrl}/users/profile`, {
-    headers,
-    cache: "no-store",
-  });
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...options.headers,
+  };
+  if (token)
+    (headers as Record<string, string>)["Cookie"] = `jwt_token=${token}`;
 
-  return res.ok ? { user: await res.json() } : { user: null };
+  try {
+    const res = await fetch(`${baseUrl}${path}`, {
+      headers,
+      cache: "no-store",
+      ...options,
+    });
+    return res.ok ? await res.json() : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+export const serverApi = {
+  users: {
+    getProfile: () => fetchServer<User>("/users/profile"),
+  },
+  // ...其他 domains
+};
+```
+
+**第二步：在 Server Component 中使用**
+
+```typescript
+// app/page.tsx (Server Component)
+import { serverApi } from "@/lib/api/server";
+
+async function getData() {
+  const user = await serverApi.users.getProfile();
+  return { user };
 }
 ```
 

@@ -4,3 +4,6 @@
 [submodule "backend"]
 	path = backend
 	url = https://github.com/gh286991/praxis-backend.git
+[submodule "admin"]
+	path = admin
+	url = https://github.com/gh286991/praxis-admin.git
