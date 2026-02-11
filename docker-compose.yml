@@ -13,12 +13,12 @@ services:
     environment:
       - NODE_ENV=production
       - NEXT_PUBLIC_BACKEND_URL=/api
+      - BACKEND_INTERNAL_URL=http://backend:3001/api
     depends_on:
       - backend
 
   # Backend Application (Nest.js)
   backend:
-
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -26,7 +26,7 @@ services:
     restart: always
     environment:
       - PORT=3001
-      - MONGODB_URI=mongodb://mongo:27017/praxis-db
+      - MONGODB_URI=${MONGODB_URI}
       - JWT_SECRET=${JWT_SECRET}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       # Google OAuth
@@ -35,45 +35,13 @@ services:
       - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
       - FRONTEND_URL=${FRONTEND_URL}
       - NODE_ENV=${NODE_ENV:-production}
-      - PYTHON_RUNNER_CONTAINER_NAME=${PYTHON_RUNNER_CONTAINER_NAME:-praxis-python-runner}
-    depends_on:
-      - mongo
-      - python-runner # Ensure backend waits for/knows about runner, though backend spawns it dynamically
-      # Actually backend needs the IMAGE available. Docker compose build will build services.
-    # To allow backend to spawn sibling containers, we need to mount docker socket
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /tmp:/tmp # Share tmp for code file exchange
     expose:
       - "3001"
-
-  # Python Runner Service (Build only helper)
-  # This service is mainly to ensure the image 'python-runner' (or similar) is built.
-  # However, our code uses 'python:3.11-alpine' directly.
-  # If we want a custom image, we define it here.
-  # For now, let's keep it simple and just ensure the backend has docker access.
-  python-runner:
-     build:
-       context: ./backend/docker/nsjail
-       dockerfile: Dockerfile
-     image: tqc-nsjail-runner:latest
-     container_name: praxis-python-runner
-     command: ["tail", "-f", "/dev/null"] # Keep it running if we want to exec into it, or just for build
-     init: true
-     volumes:
-       - ./backend/temp:/app/temp
-     network_mode: none
-     privileged: true
-
-  # Database (MongoDB)
-  mongo:
-    image: mongo:latest
-    container_name: praxis-mongo
-    restart: always
-    volumes:
-      - mongo-data:/data/db
-    expose:
-      - "27017"
 
   # Reverse Proxy (Nginx)
   nginx:
@@ -85,7 +53,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - frontend
+      # - frontend
       - backend
 
 volumes:
